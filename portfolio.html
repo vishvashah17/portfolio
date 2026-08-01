@@ -1,4 +1,3 @@
-<!-- portfolio.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,37 +161,17 @@ nav{
 }
 .tag:hover{border-color:var(--accent);color:var(--accent)}
 
-/* photo upload block */
-.pu{
-  background:var(--s1);border:1px solid var(--b2);
+/* static profile photo */
+.photo-frame{
+  background:var(--s2);border:1px solid var(--b2);
   aspect-ratio:1/1;position:relative;margin-bottom:1rem;opacity:0;
-  display:flex;align-items:center;justify-content:center;
-  cursor:none;overflow:hidden;transition:border-color .2s,background .2s;
+  overflow:hidden;
 }
-.pu::after{
+.photo-frame::after{
   content:'';position:absolute;bottom:8px;right:8px;width:9px;height:9px;
   border-right:1.5px solid var(--b2);border-bottom:1.5px solid var(--b2);
 }
-.pu:hover{border-color:var(--accent);background:var(--adim)}
-.pu.has-img{padding:0}
-.pu img{width:100%;height:100%;object-fit:cover;display:block}
-.pu-empty{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.5rem;text-align:center}
-.pu-ic{
-  width:42px;height:42px;border:1.5px dashed var(--b2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;color:var(--muted);transition:border-color .2s,color .2s;
-}
-.pu:hover .pu-ic{border-color:var(--accent);color:var(--accent)}
-.pu-label{font-family:var(--ff-m);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
-.pu-sub{font-family:var(--ff-m);font-size:.54rem;letter-spacing:.05em;color:var(--muted)}
-.pu-remove{
-  position:absolute;top:8px;right:8px;z-index:2;
-  width:24px;height:24px;background:rgba(18,21,28,.65);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:.7rem;
-  cursor:none;opacity:0;transition:opacity .2s;
-}
-.pu.has-img:hover .pu-remove{opacity:1}
-#pu-file{display:none}
+.photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* hero card */
 .hc{
@@ -509,15 +488,14 @@ footer{
       </div>
     </div>
     <div>
-    <label class="pu" id="pu-drop" for="pu-file">
-      <input type="file" id="pu-file" accept="image/*"/>
-      <span class="pu-remove" id="pu-remove" title="Remove photo">✕</span>
-      <span class="pu-empty" id="pu-empty">
-        <span class="pu-ic">＋</span>
-        <span class="pu-label">Upload Photo</span>
-        <span class="pu-sub">Click or drag an image</span>
-      </span>
-    </label>
+    <div class="photo-frame" id="photo-frame">
+      <img src="photo.png" alt="Vishva Shah"
+           onerror="this.onerror=null;
+                    if(this.dataset.tried!=='jpg'){this.dataset.tried='jpg';this.src='photo.jpg';}
+                    else if(this.dataset.tried!=='jpeg'){this.dataset.tried='jpeg';this.src='photo.jpeg';}
+                    else if(this.dataset.tried!=='webp'){this.dataset.tried='webp';this.src='photo.webp';}
+                    else{this.style.display='none';}">
+    </div>
     <div class="hc" id="hero-card">
       <div class="hc-av">VS</div>
       <div class="hc-name">VISHVA SHAH</div>
@@ -529,6 +507,7 @@ footer{
         <div class="hcs"><div class="hcs-v">NUS</div><div class="hcs-l">PUBLICATION</div></div>
       </div>
       <div class="hc-pill"><span class="hc-dot"></span>OPEN TO INTERNSHIPS</div>
+
     </div>
     </div>
   </div>
@@ -739,7 +718,7 @@ htl.from('#tl1 .char', { y: 95, opacity: 0, rotateX: -90, duration: 0.8, stagger
    .from('.hero-desc',  { y: 28, opacity: 0, duration: 0.7, ease: 'power3.out' }, 1.2)
    .from('.hero-ctas a',{ y: 22, opacity: 0, scale: 0.88, duration: 0.5, stagger: 0.09, ease: 'back.out(2.5)' }, 1.45)
    .from('.hero-tags .tag', { y: 14, opacity: 0, duration: 0.38, stagger: 0.045, ease: 'power2.out' }, 1.7)
-   .fromTo('#pu-drop', { x: 55, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease: 'power3.out' }, 0.9)
+   .fromTo('#photo-frame', { x: 55, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease: 'power3.out' }, 0.9)
    .fromTo('#hero-card', { x: 55, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease: 'power3.out' }, 1.05)
    .from('.hcs', { y: 22, opacity: 0, duration: 0.4, stagger: 0.075, ease: 'back.out(1.8)' }, 1.5);
 
@@ -1000,48 +979,7 @@ window.addEventListener('scroll', () => {
 })();
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   6. PHOTO UPLOAD BLOCK
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-(function initPhotoUpload() {
-  const drop   = document.getElementById('pu-drop');
-  const input  = document.getElementById('pu-file');
-  const empty  = document.getElementById('pu-empty');
-  const remove = document.getElementById('pu-remove');
-  let imgEl = null;
-
-  function showFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    const url = URL.createObjectURL(file);
-    if (!imgEl) {
-      imgEl = document.createElement('img');
-      drop.insertBefore(imgEl, empty);
-    }
-    imgEl.src = url;
-    drop.classList.add('has-img');
-    empty.style.display = 'none';
-  }
-
-  input.addEventListener('change', e => showFile(e.target.files[0]));
-
-  ['dragenter','dragover'].forEach(evt =>
-    drop.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); })
-  );
-  drop.addEventListener('drop', e => {
-    e.preventDefault(); e.stopPropagation();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) showFile(e.dataTransfer.files[0]);
-  });
-
-  remove.addEventListener('click', e => {
-    e.preventDefault(); e.stopPropagation();
-    input.value = '';
-    if (imgEl) { imgEl.remove(); imgEl = null; }
-    drop.classList.remove('has-img');
-    empty.style.display = 'flex';
-  });
-})();
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   7. CUSTOM CURSOR
+   6. CUSTOM CURSOR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 (function initCursor() {
   const dot  = document.getElementById('cur-dot');
@@ -1060,7 +998,7 @@ window.addEventListener('scroll', () => {
     ring.style.cssText = `left:${rx}px;top:${ry}px`;
   })();
 
-  const hoverEls = 'a, button, .tag, .sk, .pc, .ach, .cert, .clr, .mr, .btn-p, .btn-g, .pu, .pu-remove, [data-hover]';
+  const hoverEls = 'a, button, .tag, .sk, .pc, .ach, .cert, .clr, .mr, .btn-p, .btn-g, [data-hover]';
   document.querySelectorAll(hoverEls).forEach(el => {
     el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
     el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
